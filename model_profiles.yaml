@@ -1,0 +1,37 @@
+schema_version: 1
+default: deepseek_flash
+profiles:
+  deepseek_flash:
+    provider: deepseek
+    model_id: deepseek-flash
+    model_env: DEEPSEEK_MODEL
+    base_url_env: DEEPSEEK_BASE_URL
+    api_key_env: DEEPSEEK_API_KEY
+    thinking: disabled
+    output_format: json_object
+    snapshot_id: null
+    region: unknown
+    pricing: null
+    note: 同一云端型号用于规划及生成；输出上限由阶段固定（规划3072、生成4096），适配器超时90秒/连接10秒；上下文预算取应用配置。上述值不是档案可调项，运行记录保存实际参数与SHA256；未提供固定快照时记录响应型号和指纹。
+embedding:
+  provider: dashscope
+  model_id: text-embedding-v3
+  dimension: 1024
+  url_env: DASHSCOPE_EMBEDDING_URL
+  api_key_env: DASHSCOPE_API_KEY
+  purposes: [document, query]
+  normalization: l2
+  distance: cosine
+  pricing: null
+tokenizer:
+  model_id: BAAI/bge-m3
+  revision: 5617a9f61b028005a4858fdac845db406aefb181
+  sha256: 21106b6d7dab2952c1d496fb21d5dc9db75c28ed361a05f5020bbba27810dd08
+  chunk_size: 500
+  overlap: 80
+reranker:
+  model_id: BAAI/bge-reranker-v2-m3
+  revision: 953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e
+  batch_size: 2
+  max_length: 1024
+  device: auto

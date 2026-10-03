@@ -1,0 +1,208 @@
+{
+  "schema_version": "1.0",
+  "verified_on": "2026-10-03",
+  "document_section": "7.1 首版指标白名单",
+  "purpose": "公式定义与公开来源准备记录；未实施计算器，未调用样本公司的财务API。",
+  "execution_policy": "模型只选择白名单 formula_id 和参数；程序以 Decimal 计算。公式字符串仅用于说明，禁止用 eval/exec 执行。JSON金额及结果使用十进制字符串，展示前不提前舍入。",
+  "source_boundary": "来源支持分析定义，不代表监管统一强制公式；中文财报字段映射、基期限制和显示规则是本项目业务约束。资产负债率直接核对用户提供招股书PDF第204页，未使用全文无法读取的搜索摘录作为最终依据。",
+  "shared_constraints": [
+    "同公司、同币种、统一金额单位、同合并口径；首版适用非金融企业。",
+    "不将缺失值填零；单位、期间、来源冲突未解决时不计算。",
+    "年度收入、利润、经营现金流使用完整年度；半年报使用明确的1—6月累计期间，同比只与上年同期比较，不年化或混用全年。时点指标使用明确的期末值。"
+  ],
+  "metrics": [
+    {
+      "id": "revenue_yoy",
+      "label": "营业收入同比",
+      "formula": "(本期营业收入 / 可比上期营业收入 - 1) × 100%",
+      "unit": "percent",
+      "constraints": [
+        "可比上期营业收入必须大于0；为0或负数时不输出常规增长率。",
+        "本期和上期期间长度一致，采用选定财务报告的可比数并标记重述；2026H1只能与2025H1同比。",
+        "这是相对变动的普通算术，正基期限制是项目规则，不宣称监管统一口径。"
+      ],
+      "sources": [],
+      "status": "project_arithmetic_definition_no_direct_official_formula_cited"
+    },
+    {
+      "id": "parent_net_profit_yoy",
+      "label": "归母净利润同比",
+      "formula": "(本期归母净利润 / 可比上期归母净利润 - 1) × 100%",
+      "unit": "percent",
+      "constraints": [
+        "可比上期归母净利润必须大于0；零或负基期展示金额变化及原因，不给常规增长率。",
+        "归母净利润是合并报表归属于母公司所有者的净利润，不是母公司单体利润表净利润。",
+        "这是对指定利润字段应用普通同比算术；不宣称有统一监管负基期公式。"
+      ],
+      "sources": [],
+      "status": "project_arithmetic_definition_no_direct_official_formula_cited"
+    },
+    {
+      "id": "gross_margin",
+      "label": "毛利率",
+      "formula": "(营业收入 - 营业成本) / 营业收入 × 100%",
+      "unit": "percent",
+      "constraints": [
+        "营业收入必须大于0。",
+        "成本使用与营业收入匹配的营业成本，不使用营业总成本；两项同期间、同口径。",
+        "CFA支持毛利/收入；SEC支持收入扣除销售成本得到毛利。映射到中文财报营业收入、营业成本为本项目非金融企业口径。"
+      ],
+      "sources": [
+        {
+          "title": "CFA Institute — Financial Ratio List（第1页，第1、15、18项）",
+          "url": "https://www.cfainstitute.org/sites/default/files/-/media/documents/support/programs/cfa/cfa_program_level_ii_financial_ratio_list.pdf",
+          "supports": "第15项给出毛利占总收入的比率定义；第1页。"
+        },
+        {
+          "title": "SEC — Beginners' Guide to Financial Statements（Income Statements）",
+          "url": "https://www.sec.gov/about/reports-publications/beginners-guide-financial-statements",
+          "supports": "Income Statements说明净收入减去销售成本得到gross profit，支持毛利的构成。"
+        }
+      ],
+      "status": "primary_sources_verified_project_field_mapping"
+    },
+    {
+      "id": "net_margin",
+      "label": "净利率",
+      "formula": "合并净利润 / 营业收入 × 100%",
+      "unit": "percent",
+      "constraints": [
+        "营业收入必须大于0。",
+        "采用合并净利润，不静默替换为归母净利润、扣非净利润或母公司单体净利润。",
+        "净利润为负时可得到负净利率，不因此判为缺失。"
+      ],
+      "sources": [
+        {
+          "title": "CFA Institute — Financial Ratio List（第1页，第1、15、18项）",
+          "url": "https://www.cfainstitute.org/sites/default/files/-/media/documents/support/programs/cfa/cfa_program_level_ii_financial_ratio_list.pdf",
+          "supports": "第18项给出Net profit margin为净利润与总收入之比；第1页。"
+        }
+      ],
+      "status": "primary_source_verified_project_field_mapping"
+    },
+    {
+      "id": "debt_asset_ratio",
+      "label": "资产负债率",
+      "formula": "期末负债总额 / 期末资产总额 × 100%",
+      "unit": "percent",
+      "constraints": [
+        "期末资产总额必须大于0；资产和负债来自同一报表时点及口径。",
+        "分子使用负债总额，包括非有息负债；不是仅用借款、债券等有息债务。",
+        "CFA清单中的debt-to-assets以有息债务为分子，不能冒作本公式来源。",
+        "来源为发行人披露中的计算方法，不能表述为交易所制定的统一监管公式。"
+      ],
+      "sources": [
+        {
+          "title": "贵州南方乳业股份有限公司招股说明书：主要财务指标计算公式",
+          "path": "D:\\Desktop\\南方乳业：招股说明书.pdf",
+          "pdf_page_number": 204,
+          "printed_page_label": "1-1-203",
+          "quote": "3、资产负债率=负债总额/资产总额×100%",
+          "supports": "用户提供的发行人原文直接列出总负债/总资产的定义，已核对文字与页面图像；属于发行人披露口径，不称为监管统一规定。",
+          "text_verified": true,
+          "visual_verified": true
+        }
+      ],
+      "status": "provided_primary_document_verified_text_and_visual"
+    },
+    {
+      "id": "current_ratio",
+      "label": "流动比率",
+      "formula": "期末流动资产 / 期末流动负债",
+      "unit": "times",
+      "constraints": [
+        "期末流动负债必须大于0；同一报表时点、同合并口径。",
+        "输出倍数而非百分数；流动/非流动分类不适用时不计算。"
+      ],
+      "sources": [
+        {
+          "title": "CFA Institute — Financial Ratio List（第1页，第1、15、18项）",
+          "url": "https://www.cfainstitute.org/sites/default/files/-/media/documents/support/programs/cfa/cfa_program_level_ii_financial_ratio_list.pdf",
+          "supports": "第1项定义Current ratio为流动资产除以流动负债；第1页。"
+        }
+      ],
+      "status": "primary_source_verified"
+    },
+    {
+      "id": "operating_cash_flow_to_revenue",
+      "label": "经营现金流收入比",
+      "formula": "经营活动现金流量净额 / 营业收入 × 100%",
+      "unit": "percent",
+      "constraints": [
+        "营业收入必须大于0；分子分母为同一起止期间、同币种、同合并口径。",
+        "使用经营活动现金流量净额，不使用现金净增加额或销售商品收到的现金。",
+        "负经营现金流是有效输入；该比率不等同于客户回款率，也不单独证明收入真实性。",
+        "CFA的CFO/revenue支持分析比率；本项目映射到中国报表披露的经营现金净额并以百分比展示，不据此声称统一监管指标。"
+      ],
+      "sources": [
+        {
+          "title": "CFA Institute — Revenue Recognition: Top 10 Questions Investors Should Ask About the Adoption of the New Standard（第14页，Figure 9）",
+          "url": "https://rpc.cfainstitute.org/sites/default/files/-/media/documents/article/position-paper/revenue-recognition-top-ten-questions-investors-should-ask.pdf",
+          "supports": "第14页Figure 9将Cash Flow to Revenue定义为CFO/Revenue；第13页正文说明CFO为经营活动现金流。"
+        }
+      ],
+      "status": "primary_source_verified_project_field_mapping"
+    },
+    {
+      "id": "gross_margin_yoy_pp",
+      "label": "毛利率同比百分点变化",
+      "formula": "本期毛利率百分数数值 - 可比上期毛利率百分数数值",
+      "unit": "percentage_points",
+      "constraints": [
+        "两期毛利率使用相同口径；必须先通过两期毛利率的输入校验。",
+        "若内部保存比例小数，数值计算为(本期比例 - 上期比例) × 100，再标记单位为百分点。",
+        "例如32%减30%为2个百分点，不是2%的相对增长。",
+        "这是百分比之差的普通算术；不声称独立的监管财务指标。"
+      ],
+      "sources": [
+        {
+          "title": "CFA Institute — Financial Ratio List（第1页，第1、15、18项）",
+          "url": "https://www.cfainstitute.org/sites/default/files/-/media/documents/support/programs/cfa/cfa_program_level_ii_financial_ratio_list.pdf",
+          "supports": "仅支持两期基础毛利率定义；不将该来源冒作百分点相减算法的独立规定。"
+        }
+      ],
+      "status": "project_arithmetic_derivation"
+    }
+  ],
+  "illustrative_examples": [
+    {
+      "id": "hypothetical_revenue_yoy",
+      "label": "假设数值演示：营业收入同比",
+      "is_hypothetical": true,
+      "not_sample_company_data": true,
+      "formula_id": "revenue_yoy",
+      "inputs": {
+        "current_revenue": "120",
+        "prior_revenue": "100",
+        "amount_unit": "相同金额单位"
+      },
+      "decimal_expression": "(Decimal('120') / Decimal('100') - Decimal('1')) * Decimal('100')",
+      "expected_result": "20",
+      "expected_display": "20.00%",
+      "note": "仅用于展示计算口径；不是南方乳业或其他样本公司的真实财务数据。"
+    },
+    {
+      "id": "hypothetical_gross_margin",
+      "label": "假设数值演示：毛利率",
+      "is_hypothetical": true,
+      "not_sample_company_data": true,
+      "formula_id": "gross_margin",
+      "inputs": {
+        "revenue": "100",
+        "cost": "70",
+        "amount_unit": "相同金额单位"
+      },
+      "decimal_expression": "(Decimal('100') - Decimal('70')) / Decimal('100') * Decimal('100')",
+      "expected_result": "30",
+      "expected_display": "30.00%",
+      "note": "仅用于展示计算口径；不是南方乳业或其他样本公司的真实财务数据。"
+    }
+  ],
+  "implementation_status": "not_implemented",
+  "direct_formula_source_gap_ids": [
+    "revenue_yoy",
+    "parent_net_profit_yoy",
+    "gross_margin_yoy_pp"
+  ],
+  "source_count": 4
+}

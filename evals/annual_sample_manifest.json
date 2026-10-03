@@ -1,0 +1,199 @@
+{
+  "schema_version": "1.0",
+  "purpose": "formal_annual_evaluation_sources",
+  "prepared_at": "2026-10-03T15:02:58.580028+00:00",
+  "samples": [
+    {
+      "id": "moutai_2023",
+      "company": "贵州茅台酒股份有限公司",
+      "stock_code": "600519",
+      "year": 2023,
+      "split": "development",
+      "disclosure_date": "2024-04-03",
+      "url": "https://dataclouds.cninfo.com.cn/shgonggao/2024/2024-04-03/93d5007bf0fa11ee84b5fa163e26e5de.pdf",
+      "downloaded_at": "2026-10-03T14:41:27.078493+00:00",
+      "resolved_source_url": "https://dataclouds.cninfo.com.cn/shgonggao/2024/2024-04-03/93d5007bf0fa11ee84b5fa163e26e5de.pdf",
+      "path": "D:\\Desktop\\A股年报分析系统\\data\\samples\\annual\\moutai_2023.pdf",
+      "sha256": "2125ff97a452ea79b0d784e2432f7d224b6aecc330b644b593477d69e22f4ed1",
+      "size_bytes": 3563819,
+      "page_count": 143,
+      "title": "贵州茅台酒股份有限公司2023年年度报告",
+      "doc_type": "annual_report",
+      "identity_verification": "assistant_checked_cover_text_and_official_source",
+      "human_reviewed": false,
+      "label_status": "assistant_development_reference_prepared",
+      "fiscal_year": 2023,
+      "report_periods": [
+        {
+          "label": "2023",
+          "period_start": "2023-01-01",
+          "period_end": "2023-12-31"
+        }
+      ],
+      "reference_path": "evals/moutai_2023_reference.json",
+      "source_url": "https://dataclouds.cninfo.com.cn/shgonggao/2024/2024-04-03/93d5007bf0fa11ee84b5fa163e26e5de.pdf"
+    },
+    {
+      "id": "moutai_2024",
+      "company": "贵州茅台酒股份有限公司",
+      "stock_code": "600519",
+      "year": 2024,
+      "split": "development",
+      "disclosure_date": "2025-04-03",
+      "url": "https://static.cninfo.com.cn/finalpage/2025-04-03/1222993920.PDF",
+      "downloaded_at": "2026-10-03T14:41:38.209676+00:00",
+      "resolved_source_url": "https://static.cninfo.com.cn/finalpage/2025-04-03/1222993920.PDF",
+      "path": "D:\\Desktop\\A股年报分析系统\\data\\samples\\annual\\moutai_2024.pdf",
+      "sha256": "5299f4940e2ce4e91084b73dc457d558b9d335fa76fbfee6227e4254eb7f4a30",
+      "size_bytes": 3626217,
+      "page_count": 143,
+      "title": "贵州茅台酒股份有限公司2024年年度报告",
+      "doc_type": "annual_report",
+      "identity_verification": "assistant_checked_cover_text_and_official_source",
+      "human_reviewed": false,
+      "label_status": "assistant_development_reference_prepared",
+      "fiscal_year": 2024,
+      "report_periods": [
+        {
+          "label": "2024",
+          "period_start": "2024-01-01",
+          "period_end": "2024-12-31"
+        }
+      ],
+      "reference_path": "evals/moutai_2024_reference.json",
+      "source_url": "https://static.cninfo.com.cn/finalpage/2025-04-03/1222993920.PDF"
+    },
+    {
+      "id": "gree_2023",
+      "company": "珠海格力电器股份有限公司",
+      "stock_code": "000651",
+      "year": 2023,
+      "split": "development",
+      "disclosure_date": "2024-04-30",
+      "url": "https://static.cninfo.com.cn/finalpage/2024-04-30/1219928418.PDF",
+      "downloaded_at": "2026-10-03T14:41:50.002432+00:00",
+      "resolved_source_url": "https://static.cninfo.com.cn/finalpage/2024-04-30/1219928418.PDF",
+      "path": "D:\\Desktop\\A股年报分析系统\\data\\samples\\annual\\gree_2023.pdf",
+      "sha256": "32ebc475a2291ce4f1b5c1a9f9da55227e03192f07e75041e976c29d213ec8aa",
+      "size_bytes": 3911496,
+      "page_count": 249,
+      "title": "珠海格力电器股份有限公司2023年年度报告",
+      "doc_type": "annual_report",
+      "identity_verification": "assistant_checked_cover_text_and_official_source",
+      "human_reviewed": false,
+      "label_status": "assistant_development_reference_prepared",
+      "fiscal_year": 2023,
+      "report_periods": [
+        {
+          "label": "2023",
+          "period_start": "2023-01-01",
+          "period_end": "2023-12-31"
+        }
+      ],
+      "reference_path": "evals/gree_2023_reference.json",
+      "source_url": "https://static.cninfo.com.cn/finalpage/2024-04-30/1219928418.PDF"
+    },
+    {
+      "id": "gree_2024",
+      "company": "珠海格力电器股份有限公司",
+      "stock_code": "000651",
+      "year": 2024,
+      "split": "development",
+      "disclosure_date": "2025-04-28",
+      "url": "https://static.cninfo.com.cn/finalpage/2025-04-28/1223330631.PDF",
+      "downloaded_at": "2026-10-03T14:42:05.495238+00:00",
+      "resolved_source_url": "https://static.cninfo.com.cn/finalpage/2025-04-28/1223330631.PDF",
+      "path": "D:\\Desktop\\A股年报分析系统\\data\\samples\\annual\\gree_2024.pdf",
+      "sha256": "c7184706caf5f57c04a795990967cfc4f4253024e02f8bdaffe2b260df2c6006",
+      "size_bytes": 5087621,
+      "page_count": 248,
+      "title": "珠海格力电器股份有限公司2024年年度报告",
+      "doc_type": "annual_report",
+      "identity_verification": "assistant_checked_cover_text_and_official_source",
+      "human_reviewed": false,
+      "label_status": "assistant_development_reference_prepared",
+      "fiscal_year": 2024,
+      "report_periods": [
+        {
+          "label": "2024",
+          "period_start": "2024-01-01",
+          "period_end": "2024-12-31"
+        }
+      ],
+      "reference_path": "evals/gree_2024_reference.json",
+      "source_url": "https://static.cninfo.com.cn/finalpage/2025-04-28/1223330631.PDF"
+    },
+    {
+      "id": "fuyao_2023",
+      "company": "福耀玻璃工业集团股份有限公司",
+      "stock_code": "600660",
+      "year": 2023,
+      "split": "test",
+      "disclosure_date": "2024-03-16",
+      "url": "https://www.fuyaogroup.com/upfiles/investor/202403/1710498588937.pdf",
+      "downloaded_at": "2026-10-03T14:42:23.413930+00:00",
+      "resolved_source_url": "https://www.fuyaogroup.com/upfiles/investor/202403/1710498588937.pdf",
+      "path": "D:\\Desktop\\A股年报分析系统\\data\\samples\\annual\\fuyao_2023.pdf",
+      "sha256": "9469887d1360328f28f9fc0fbde1056a1d9195218b5bd617775389295f1264c4",
+      "size_bytes": 4213206,
+      "page_count": 188,
+      "title": "福耀玻璃工业集团股份有限公司2023年年度报告",
+      "doc_type": "annual_report",
+      "identity_verification": "assistant_checked_cover_text_and_official_source",
+      "human_reviewed": false,
+      "label_status": "assistant_heldout_reference_prepared_after_freeze",
+      "fiscal_year": 2023,
+      "report_periods": [
+        {
+          "label": "2023",
+          "period_start": "2023-01-01",
+          "period_end": "2023-12-31"
+        }
+      ],
+      "source_url": "https://www.fuyaogroup.com/upfiles/investor/202403/1710498588937.pdf",
+      "reference_path": "evals/fuyao_2023_reference.json"
+    },
+    {
+      "id": "fuyao_2024",
+      "company": "福耀玻璃工业集团股份有限公司",
+      "stock_code": "600660",
+      "year": 2024,
+      "split": "test",
+      "disclosure_date": "2025-03-19",
+      "url": "https://static.cninfo.com.cn/finalpage/2025-03-19/1222834034.PDF",
+      "downloaded_at": "2026-10-03T14:42:23.992817+00:00",
+      "resolved_source_url": "https://static.cninfo.com.cn/finalpage/2025-03-19/1222834034.PDF",
+      "path": "D:\\Desktop\\A股年报分析系统\\data\\samples\\annual\\fuyao_2024.pdf",
+      "sha256": "5e184ffd29c5f467bbffea158b3bb7c0be3a4f5959b33d1d633671c204dbbab1",
+      "size_bytes": 4316462,
+      "page_count": 200,
+      "title": "福耀玻璃工业集团股份有限公司2024年年度报告",
+      "doc_type": "annual_report",
+      "identity_verification": "assistant_checked_cover_text_and_official_source",
+      "human_reviewed": false,
+      "label_status": "assistant_heldout_reference_prepared_after_freeze",
+      "fiscal_year": 2024,
+      "report_periods": [
+        {
+          "label": "2024",
+          "period_start": "2024-01-01",
+          "period_end": "2024-12-31"
+        }
+      ],
+      "source_url": "https://static.cninfo.com.cn/finalpage/2025-03-19/1222834034.PDF",
+      "reference_path": "evals/fuyao_2024_reference.json"
+    }
+  ],
+  "scope": "Selected 3 companies x 2 annual reports; not exhaustive market coverage",
+  "labeling": {
+    "development_target": 20,
+    "test_target": 30,
+    "test_labels_require_rules_freeze": true,
+    "human_reviewed": false,
+    "gold_complete": false,
+    "development_prepared": 20,
+    "test_prepared": 30,
+    "combined_prepared": 50,
+    "rules_freeze_sha256": "e9f3c0ec6c3423f1f0eb87c91ce7fab364bb7eb2e3573d90cac5a964afc63ce2"
+  }
+}

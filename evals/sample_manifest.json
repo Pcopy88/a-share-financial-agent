@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-10-03",
+  "purpose": "development_only",
+  "documents": [
+    {
+      "id": "nanfang_prospectus",
+      "path": "D:\\Desktop\\南方乳业：招股说明书.pdf",
+      "sha256": "d6351a8e093d35974f1f7394680fd89909013f5c8f7dec2df7dbccb260399b80",
+      "page_count": 360,
+      "split": "development",
+      "registered_at": "2026-10-03",
+      "file_size": 6842453,
+      "company": "贵州南方乳业股份有限公司",
+      "doc_type": "prospectus",
+      "inquiry_round": null,
+      "source_review_status": "previous_selected_pages_checked",
+      "human_reviewed": false
+    },
+    {
+      "id": "yuejiang_inquiry_response_202606",
+      "path": "D:\\Desktop\\越疆：关于深圳市越疆科技股份有限公司首次公开发行股票并在创业板上市申请文件的审核问询函的回复.pdf",
+      "sha256": "9b7ad26b5c6e2a4d1e4d8607e40f214a8f31f40f3f362f7b98346ae33a809652",
+      "page_count": 131,
+      "split": "development",
+      "registered_at": "2026-10-03",
+      "file_size": 2192129,
+      "company": "深圳市越疆科技股份有限公司",
+      "document_title": "关于深圳市越疆科技股份有限公司首次公开发行股票并在创业板上市申请文件的审核问询函的回复",
+      "doc_type": "inquiry_response",
+      "inquiry_round": null,
+      "identity_notes": [
+        "inquiry_round未由正文明确编号；封面与引言均称审核问询函，未出现第一轮或首轮。此资料称为第一份回复材料，202606标识来自已核验回复封面月份；文件名中的round1仅为本次临时输出命名，不作为轮次事实。",
+        "PDF包含前置海外监管公告和回复封面。所选证据的物理页7/8/9/10分别对应印刷页1-5/1-6/1-7/1-8。",
+        "公告日期、回复封面月份与引用的问询函日期分别记录；未从文件名推断日期。",
+        "4题均为开发用例、原文语义查证，无全文否定或穷尽任务。产品负载及轴数属于披露属性，标为semantic，不要求财务计算器执行。",
+        "source_verified只表示原 PDF 文字与图像核对完成，不表示应用检索或模型回答已跑通。"
+      ],
+      "date_evidence": {
+        "overseas_regulatory_announcement_date": "2026-06-22",
+        "reply_cover_month": "2026-06",
+        "referenced_inquiry_letter_date": "2026-05-07"
+      },
+      "text_extraction_note": "正文可提取；前置海外公告文字层有乱码，身份日期以页面视觉核对。",
+      "source_review_status": "selected_pages_checked_by_assistant",
+      "human_reviewed": false
+    },
+    {
+      "id": "yuejiang_inquiry_response_round2",
+      "path": "D:\\Desktop\\越疆：关于深圳市越疆科技股份有限公司首次公开发行股票并在创业板上市申请文件的第二轮审核问询函的回复.pdf",
+      "sha256": "eb495936b5c76d87f26fa4f9e671b0746db80f45c48b22266972094623d7011d",
+      "page_count": 48,
+      "split": "development",
+      "registered_at": "2026-10-03",
+      "file_size": 1838913,
+      "company": "深圳市越疆科技股份有限公司",
+      "document_title": "关于深圳市越疆科技股份有限公司首次公开发行股票并在创业板上市申请文件的第二轮审核问询函的回复",
+      "doc_type": "inquiry_response",
+      "inquiry_round": 2,
+      "identity_notes": [
+        "轮次依据PDF第2页标题及第3页正文对第二轮审核问询函（审核函〔2026〕010091号）的引用确认，不仅依据文件名。",
+        "PDF共48页，包含1页海外监管公告、1页内封面；PDF第3页印刷页码为1-1。",
+        "PDF第1页文字提取有乱码，公告日期使用渲染页视觉核对；内封面仅披露月份，不补造回复具体日。",
+        "已视觉核对PDF第1、2、3、5、6、8、11页。",
+        "4题均为开发题素材，未执行Agent评测，不能记作独立测试集或准确率结果。",
+        "route按语义/数据/混合设计预标注；第4题需要同时定位数值和订单限定口径。",
+        "证据quote仅将原PDF换行及连续空白折叠，未替换数值或省略关键限定条件。"
+      ],
+      "date_evidence": {
+        "response_cover_month": "2026-07",
+        "overseas_regulatory_announcement_date": "2026-07-07",
+        "verification": "PDF第2页内封面视觉与文字核对为二〇二六年七月；PDF第1页海外监管公告落款视觉核对为2026年7月7日，公告日期不等同回复签署日。"
+      },
+      "text_extraction_note": "正文可提取；前置海外公告文字层有乱码，身份日期以页面视觉核对。",
+      "source_review_status": "selected_pages_checked_by_assistant",
+      "human_reviewed": false
+    },
+    {
+      "id": "jiangfeng_semiannual_2026h1",
+      "path": "D:\\Desktop\\江丰电子：2026年半年度报告（更正后）.pdf",
+      "sha256": "b787c2067ba7740e343636858ae698d835e8c0cf682354f5de898b69141bc2a5",
+      "page_count": 193,
+      "file_size": 1174550,
+      "split": "development",
+      "registered_at": "2026-10-03",
+      "company": "宁波江丰电子材料股份有限公司",
+      "stock_code": "300666",
+      "document_title": "2026 年半年度报告",
+      "doc_type": "semiannual_report",
+      "fiscal_year": 2026,
+      "report_periods": [
+        {
+          "label": "2026H1",
+          "start": "2026-01-01",
+          "end": "2026-06-30"
+        },
+        {
+          "label": "2025H1",
+          "start": "2025-01-01",
+          "end": "2025-06-30"
+        }
+      ],
+      "inquiry_round": null,
+      "disclosure_date": null,
+      "date_evidence": {
+        "cover_month": "2026-08",
+        "signed_date": "2026-08-24",
+        "note": "封面第1页与备查文件第4页；不把签署日期冒作已核实披露日期。"
+      },
+      "audit_status": "unaudited",
+      "prior_year_restatement_disclosed": false,
+      "version_label": "更正后",
+      "version_evidence": "filename_only",
+      "version_diff_verified": false,
+      "text_extraction_note": "193页均有可提取文字；文字层可读不等于表格结构已全部正确解析。",
+      "source_review_status": "selected_pages_checked_by_assistant",
+      "visual_verified_pages": [
+        1,
+        8,
+        18,
+        56,
+        57,
+        58,
+        62,
+        63,
+        66
+      ],
+      "human_reviewed": false,
+      "identity_notes": [
+        "用户口述2022年；第1页封面与第6页报告期定义均为2026年，按正文登记2026H1，不重命名原件。",
+        "利润及现金流比较2026H1与2025H1；资产负债比较2026-06-30与2025-12-31。",
+        "第56页明确未经审计；第8页勾选不追溯调整或重述以前年度数据，与文件名更正后标签分开记录。",
+        "缺少原版和更正公告，不推断更正项目，也不据此认定为可追溯差异的正式最新版本。",
+        "第62页同时含母公司资产负债表结尾和合并利润表开头，第67页同时含合并及母公司现金流量表，范围标签必须按表内分区。",
+        "本次为用户附件原文核对，未向外部披露平台核验文件真伪或完整版本链；未运行应用或云端模型。"
+      ]
+    }
+  ],
+  "updated_at": "2026-10-03"
+}

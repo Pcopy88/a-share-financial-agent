@@ -1,0 +1,100 @@
+{
+  "created_at": "2026-10-03T15:26:02.148376+00:00",
+  "freeze_sha256": "e9f3c0ec6c3423f1f0eb87c91ce7fab364bb7eb2e3573d90cac5a964afc63ce2",
+  "parser_version": "pdfplumber-structure-v4",
+  "development_sha256_unchanged": "2b9522111871928251871b284ca1c2c9ae4613899a40a3462eca3288957c9d04",
+  "test_sha256": "3722ab9d0e585a3ffbcd3d16e680e931893232ad5911c299b5167df0b7b3fa99",
+  "test_cases": 30,
+  "test_distribution": {
+    "semantic": 12,
+    "data": 9,
+    "hybrid": 6,
+    "boundary": 3
+  },
+  "quote_page_checks": 60,
+  "quote_page_checks_passed": true,
+  "source_validation": [
+    {
+      "report_id": "fuyao_2023",
+      "reference_facts": 18,
+      "actual_extracted_facts": 32,
+      "reference_matched_facts": 18,
+      "reference_not_injected_into_parser": true
+    },
+    {
+      "report_id": "fuyao_2024",
+      "reference_facts": 18,
+      "actual_extracted_facts": 32,
+      "reference_matched_facts": 18,
+      "reference_not_injected_into_parser": true
+    }
+  ],
+  "rule_differences_before_labeling": [
+    {
+      "path": "src/annual_report_agent/graph/planner.py",
+      "frozen_sha256": "45f10d5cc3a31ca46d7dd91451538947d963b480001750df2cbe97181d56dbae",
+      "observed_sha256": "4c9acf2a4c80afa7eeb963c2d1234540452819429912c2293a71f8aa9905880b"
+    },
+    {
+      "path": "src/annual_report_agent/generation/cloud_client.py",
+      "frozen_sha256": "d86e67afb5a5c38e8936e5c023ff890740d295785b93088b248a0c5608aa56ed",
+      "observed_sha256": "03833b3f94e79e650d3da273b4eb76ed6f7935656d8e0d31d4ef23f9c587f1f8"
+    },
+    {
+      "path": "src/annual_report_agent/generation/profiles.py",
+      "frozen_sha256": "457363361a29a6b11b364999e3f1b4166ca9449e98a2c3e9ed4429d6b3b74d47",
+      "observed_sha256": "9ec8665d83da609dca94bcb0a4a9de1350df0cbb3eda64b1324335fa1b87d7ec"
+    },
+    {
+      "path": "src/annual_report_agent/finance/akshare_adapter.py",
+      "frozen_sha256": "2397bd13807e578f7a8c0dc7fba0b4390df6050856c4273b9b01ce070a00e607",
+      "observed_sha256": "095ef0424556dc587d391012792847e512a464f846d1cae514eaf3faa8d71f32"
+    },
+    {
+      "path": "src/annual_report_agent/schemas/model.py",
+      "frozen_sha256": "eba88194dbfdd64204b34360f0c78eb14cbbf53750843f402707f0bd00548267",
+      "observed_sha256": "2ac35723b37127ee65487eed4d61816367106ff0ad1ad00054e69ac7f41dfedb"
+    },
+    {
+      "path": "model_profiles.yaml",
+      "frozen_sha256": "ad7e54c880947c4149209acf675e76634ea3ea268c4bc3a7b0a13419a543a572",
+      "observed_sha256": "9e2cb390a492c6dd9d416e6e0dd136e65d72784420385be019c88b917ecc97d4"
+    }
+  ],
+  "rule_differences_after_labeling": [
+    {
+      "path": "src/annual_report_agent/graph/planner.py",
+      "frozen_sha256": "45f10d5cc3a31ca46d7dd91451538947d963b480001750df2cbe97181d56dbae",
+      "observed_sha256": "4c9acf2a4c80afa7eeb963c2d1234540452819429912c2293a71f8aa9905880b"
+    },
+    {
+      "path": "src/annual_report_agent/generation/cloud_client.py",
+      "frozen_sha256": "d86e67afb5a5c38e8936e5c023ff890740d295785b93088b248a0c5608aa56ed",
+      "observed_sha256": "03833b3f94e79e650d3da273b4eb76ed6f7935656d8e0d31d4ef23f9c587f1f8"
+    },
+    {
+      "path": "src/annual_report_agent/generation/profiles.py",
+      "frozen_sha256": "457363361a29a6b11b364999e3f1b4166ca9449e98a2c3e9ed4429d6b3b74d47",
+      "observed_sha256": "9ec8665d83da609dca94bcb0a4a9de1350df0cbb3eda64b1324335fa1b87d7ec"
+    },
+    {
+      "path": "src/annual_report_agent/finance/akshare_adapter.py",
+      "frozen_sha256": "2397bd13807e578f7a8c0dc7fba0b4390df6050856c4273b9b01ce070a00e607",
+      "observed_sha256": "095ef0424556dc587d391012792847e512a464f846d1cae514eaf3faa8d71f32"
+    },
+    {
+      "path": "src/annual_report_agent/schemas/model.py",
+      "frozen_sha256": "eba88194dbfdd64204b34360f0c78eb14cbbf53750843f402707f0bd00548267",
+      "observed_sha256": "2ac35723b37127ee65487eed4d61816367106ff0ad1ad00054e69ac7f41dfedb"
+    },
+    {
+      "path": "model_profiles.yaml",
+      "frozen_sha256": "ad7e54c880947c4149209acf675e76634ea3ea268c4bc3a7b0a13419a543a572",
+      "observed_sha256": "9e2cb390a492c6dd9d416e6e0dd136e65d72784420385be019c88b917ecc97d4"
+    }
+  ],
+  "human_reviewed": false,
+  "production_rules_modified_by_this_script": false,
+  "model_evaluation_status": "not_run",
+  "boundary": "reference匹配是基于assistant标签的核验；使用该事实进行计算须标为已核验输入轨道，不能称纯自动抽取或模型得分。"
+}

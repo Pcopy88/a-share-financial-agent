@@ -1,0 +1,57 @@
+{
+  "recorded_at": "2026-10-03T15:53:36.054856+00:00",
+  "original_freeze": "evals/rules_freeze_v1.json",
+  "strict_byte_for_byte_freeze": false,
+  "heldout_guided_tuning": false,
+  "scope": "engineering corrections found by code audit, existing development cases, and generic cross-process persistence tests",
+  "changes": [
+    {
+      "path": "src/annual_report_agent/graph/planner.py",
+      "frozen_sha256": "45f10d5cc3a31ca46d7dd91451538947d963b480001750df2cbe97181d56dbae",
+      "current_sha256": "4c9acf2a4c80afa7eeb963c2d1234540452819429912c2293a71f8aa9905880b",
+      "reason": "Fix explicit operating-cash-flow/revenue mock alias from Jiangfeng development case; no live prompt change."
+    },
+    {
+      "path": "src/annual_report_agent/generation/cloud_client.py",
+      "frozen_sha256": "d86e67afb5a5c38e8936e5c023ff890740d295785b93088b248a0c5608aa56ed",
+      "current_sha256": "03833b3f94e79e650d3da273b4eb76ed6f7935656d8e0d31d4ef23f9c587f1f8",
+      "reason": "Preserve requested and returned model identity and provider fingerprint."
+    },
+    {
+      "path": "src/annual_report_agent/generation/profiles.py",
+      "frozen_sha256": "457363361a29a6b11b364999e3f1b4166ca9449e98a2c3e9ed4429d6b3b74d47",
+      "current_sha256": "6c184ba5472749039c404165427135effac66bb619e41e6138ee9cacc9100bcd",
+      "reason": "Honor model env setting, record effective parameters/hash, reject unsupported profile knobs."
+    },
+    {
+      "path": "src/annual_report_agent/finance/akshare_adapter.py",
+      "frozen_sha256": "2397bd13807e578f7a8c0dc7fba0b4390df6050856c4273b9b01ce070a00e607",
+      "current_sha256": "095ef0424556dc587d391012792847e512a464f846d1cae514eaf3faa8d71f32",
+      "reason": "Keep repeated immutable API observations under unique filenames."
+    },
+    {
+      "path": "src/annual_report_agent/ingestion/indexer.py",
+      "frozen_sha256": "54e02f25e21f7a65e29df57b875a7115e828d5a843e7a9261626330903e6a3f1",
+      "current_sha256": "391139a74fe74287df1463650175114ac12d97b2953e8b55635151b0c5094ebf",
+      "reason": "Recover corrupted materializations from cached vectors and use verified ASCII alias on Windows; real restart regression."
+    },
+    {
+      "path": "src/annual_report_agent/schemas/model.py",
+      "frozen_sha256": "eba88194dbfdd64204b34360f0c78eb14cbbf53750843f402707f0bd00548267",
+      "current_sha256": "2ac35723b37127ee65487eed4d61816367106ff0ad1ad00054e69ac7f41dfedb",
+      "reason": "Add optional generation request identity and fingerprint fields."
+    },
+    {
+      "path": "model_profiles.yaml",
+      "frozen_sha256": "ad7e54c880947c4149209acf675e76634ea3ea268c4bc3a7b0a13419a543a572",
+      "current_sha256": "2898e096b79554aa77f09eef4eddad84d0dda2a5019840850114830f0f43f014",
+      "reason": "Remove nonfunctional parameter knobs; identify fixed effective runtime settings."
+    }
+  ],
+  "additional_changes_outside_initial_scope": [
+    "runtime failure usage retention, safe error codes and resource shutdown",
+    "evaluation TopK positions, table source matching, accepted-result aggregation and frozen fact/index snapshots",
+    "Windows same-volume native path alias and independent process restart test"
+  ],
+  "quality_claim": "No real cloud model quality result; local execution only."
+}
