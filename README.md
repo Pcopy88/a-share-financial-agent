@@ -1,12 +1,147 @@
 # A 股财报资料分析 Agent
 
-上传年报、半年报、招股说明书或问询回复，在选定资料中检索原文、计算财务指标并查看来源页。当前生成模型为 DeepSeek `deepseek-flash`，向量模型为百炼 `text-embedding-v3`（1024 维）。本地保存 PDF、解析结果、SQLite 和 Chroma。
+面向 A 股年报、半年报、招股说明书和问询回复的分析工具。上传 PDF 后，可以查找披露内容、计算财务指标、对比年度数据，并回到原文页核对依据。
 
-**应用代码与本地验收已完成。** 默认 `mock` 模式不用 API Key，可以检查界面、解析、计算与工作流；它不能证明云端模型的真实问答质量。真实账户由用户完成开发后填写。实际验收记录见 [验收文档](docs/验收文档.md)，当前实现与待验项见 [开发执行记录](docs/IMPLEMENTATION_STATUS.md)。
+采用 **LangGraph 工作流 + 混合检索 + 规则计算**：云端模型负责理解问题和组织回答，本地程序负责文档处理、检索、计算和来源校验。
 
-## 1. 安装与启动（Windows PowerShell）
+> 当前版本已完成应用代码和本地流程验收，默认以 `mock` 模式运行。真实云端联通与问答质量仍待验证，模拟结果不代表模型准确率。详见 [验收文档](docs/验收文档.md)。
 
-在本项目目录执行。需要 uv 和联网下载依赖；Git 为可选工具，本项目使用 Python 3.11。先复制留空密钥的 `.env.example` 即可运行模拟模式，两家 Key 在开发完成后再填写。
+## 1. 项目背景
+
+财报资料通常篇幅长、专业术语多，重要信息分散在正文、表格和不同轮次的问询回复中。分析一个问题，往往需要先找到资料，再核对期间和单位，最后计算并记录出处。
+
+例如：“这家公司今年收入增长了多少？公司怎么解释这个变化？”需要同时完成两件事：从可比财务数据计算增幅，从原文找到管理层解释。
+
+本项目将这些步骤串成一条可追溯的流程，重点解决三个问题：
+
+- **找到对的内容**：结合关键词、语义和文档元数据检索，区分公司、期间、问询轮次和文件版本。
+- **使用可核对的数字**：由程序执行固定财务公式，保留操作数、单位和来源。
+- **回答有依据**：展示引用原文和 PDF 页码，缺少资料或条件不明确时给出缺口与澄清提示。
+
+## 2. 核心能力
+
+| 能力 | 可以做什么 |
+|---|---|
+| 资料管理 | 上传 PDF、按文件哈希去重，确认公司、文档类型、报告期、问询轮次和版本；提供沪深公告查询与下载入口 |
+| 结构化解析 | 提取正文与表格，按章节、问询问题等结构切分，保留父子块关系和原文页码 |
+| 意图识别与问题规划 | 在一次规划中完成问题改写、意图判断和拆题；普通问答最多处理 3 个明确子问题 |
+| 混合检索 | 使用 BM25 与向量检索双路召回、RRF 融合、可选本地重排，再补充命中片段的原文上下文 |
+| 财务计算与对比 | 从核验事实中取数，检查期间、单位和合并口径，执行 8 项公式，支持同公司可比年度分析 |
+| 来源追溯 | 查看引用片段、PDF 物理页、财务原值、计算过程及本次使用的数据版本 |
+| 分析报告 | 按固定模板汇总经营概况、指标、变化解释和风险，保留未回答项并导出 Markdown |
+| 评测与运行记录 | 提供 50 道年报题及开发题集，记录逐题答案、证据、配置、耗时和模型调用用量，支持检索与生成对照实验 |
+
+已实现的 8 项公式：**营业收入同比、归母净利润同比、毛利率、净利率、资产负债率、流动比率、经营现金流净额／营业收入、毛利率同比变化（百分点）**。公式及适用条件见 [财务公式参考](evals/financial_formula_reference.json)。
+
+当前范围：
+
+- 面向本机单用户，暂未提供登录、多租户和公网部署方案。
+- 扫描页会标记 `needs_ocr`，暂不自动 OCR；结构不明确的表格和未核验数值不能直接用于计算，交互式财务纠错页面尚未实现。
+- 本地重排已验证 CPU 推理，GPU 推理尚未验收；公告下载还取决于数据源与网络条件，可以使用本地 PDF 上传。
+- 程序可以检查引用来源和数字一致性，文字解释是否充分受原文支持仍需要独立评测。
+
+## 3. 系统框架
+
+```text
+                         Streamlit 界面
+                资料管理 / 分析问答 / 证据与指标 / 评测与报告
+                               │ HTTP
+                         FastAPI 后端
+                               │
+                    任务队列 + LangGraph 工作流
+                      /                    \
+                 资料准备                  问答分析
+          PDF → 解析 → 切片 → 建库    问题 → 规划 → 检索 / 计算
+                      │                    │
+            SQLite + Chroma          回答生成 → 校验 → 展示 / 导出
+
+云端服务：DeepSeek（问题规划、回答生成） · 百炼（文本向量化）
+本地组件：PDF 解析 · BM25 · 向量库 · 可选重排 · 财务计算 · 数据存储
+```
+
+| 层次 | 技术与用途 |
+|---|---|
+| 运行环境与接口 | Python 3.11、uv；FastAPI 提供接口，Streamlit 提供操作界面 |
+| Agent 编排 | LangGraph 管理九个业务节点，SQLite Checkpointer 保存工作流状态 |
+| 文档处理 | pdfplumber 提取文本和表格，pypdfium2 渲染来源页；按文档结构切分后递归拆小 |
+| 语义编码 | 云端百炼 `text-embedding-v3`，1024 维；文档与问题分别编码 |
+| 检索与重排 | Chroma 保存向量；jieba + rank-bm25 提供关键词召回；RRF 融合；本地 `BAAI/bge-reranker-v2-m3` 重排 |
+| 问题理解与生成 | 云端 DeepSeek，当前配置型号为 `deepseek-flash`；输出经 Pydantic 校验 |
+| 财务数据处理 | PDF 与 AKShare 提供候选数据；Pandas 整理数据，Decimal 执行财务公式 |
+| 持久化与评测 | SQLite 保存元数据、事实和任务；本地文件保存 PDF 与评测输出；pytest + Ruff 用于开发检查 |
+
+原 PDF、解析结果、数据库和向量库存放在本地。`live` 模式下，文档切片与检索问题发送至百炼；问题、范围信息、选中的证据和计算结果发送至 DeepSeek。运行问答不需要在本地部署生成式大模型。
+
+主要代码目录：
+
+```text
+src/annual_report_agent/
+├── ingestion/      # 文档获取、解析、切片、建库
+├── retrieval/      # 向量与 BM25 检索、融合、重排、上下文补充
+├── finance/        # 财务候选值、单位与口径处理、公式计算
+├── graph/          # 工作流状态、问题规划、条件路由
+├── generation/     # 云端调用、回答生成、引用校验、报告导出
+├── storage/        # 数据库、文件、进程锁、备份恢复
+├── evaluation/     # 题集执行、指标、逐题记录
+├── schemas/        # Pydantic 数据契约
+├── api/            # FastAPI 接口
+└── ui/             # Streamlit 界面
+```
+
+## 4. Agent 的设计
+
+Agent 按固定工作流执行。模型提出结构化计划，程序检查范围和参数，再调用检索或计算模块；模型不直接执行任意代码，也不自行编写财务公式。
+
+### 九个业务节点
+
+| 节点 | 职责 |
+|---|---|
+| N1 `acquire` | 任务入口；入库时校验已上传 PDF 的文件路径 |
+| N2 `parse` | 提取正文和表格，识别结构，生成父块、子块及财务候选事实 |
+| N3 `index` | 编码文档切片，建立索引并发布与索引版本绑定的事实 |
+| N4 `route` | 一次完成意图识别、问题改写、拆题和路径选择；条件不足时请求澄清 |
+| N5 `retrieve` | 在允许的资料范围内执行关键词、向量或混合检索 |
+| N6 `rerank` | 按配置重排候选，再补充父块原文上下文并控制长度 |
+| N7 `calculate` | 读取核验事实，检查可比性，执行公式并保留操作数与出处 |
+| N8 `compose` | 根据证据与计算结果生成逐项回答或报告内容 |
+| N9 `verify` | 检查引用、数值和结果状态，记录缺口，继续下一子问题或汇总结束 |
+
+### 两类执行流程
+
+**资料准备**在上传并确认元数据后执行，完成后才可用于分析：
+
+```text
+N1 校验文件 → N2 解析切片 → N3 编码建库 → 结束
+```
+
+**问答分析**复用已建立的知识库。N4 只规划一次，各子问题按计划串行处理；报告使用固定模板计划：
+
+```text
+N1 任务入口 → N4 问题规划
+                 ├─ 文字问题：N5 检索 → N6 重排与上下文 → N8 生成 → N9 校验
+                 ├─ 数字问题：N7 计算 → N8 生成 → N9 校验
+                 └─ 混合问题：N5 检索 → N6 重排与上下文 → N7 计算 → N8 生成 → N9 校验
+                                                                    │
+                                                继续下一子问题，或汇总结束
+```
+
+某个子问题缺少依据时，记录该项的缺口；条件不明或不支持的任务进入澄清／状态处理，不强行生成结论。
+
+### 检索与计算的关键规则
+
+1. **先按结构切，再拆长段落。** 子块上限为 `500 tokens`，长内容拆分的重叠目标为 `80 tokens`。使用固定版本的 BGE-M3 tokenizer 统一计数，只加载其计数文件；实际向量由 `text-embedding-v3` 生成。
+2. **小块召回，原文补充上下文。** 混合路径使用 BM25 + 向量双路召回，经 RRF（`k=60`）融合和可选重排后，再扩展命中块的父级原文。当前未加入摘要向量。
+3. **先限定范围，再找内容。** 公司、文档类型、年度、轮次、版本等元数据限制可检索集合；报告期与披露日期分别保存，避免把不同时间概念混在一起。
+4. **改写和拆题放在同一步。** 保留用户原问，检查改写中的数字、否定条件、报告期间和公司名称等明确条件。普通问答最多 3 个子问题，固定模板报告按章节规划。
+5. **先核验，再计算。** 只有 `verified` 事实进入计算器。缺失值、零分母、期间不可比或口径冲突会返回明确状态，不填零或猜数。
+
+默认配置为向量检索、关闭重排；完整混合链路的启用方法见下文。详细约束与开发过程见 [开发文档](docs/A股年报智能分析Agent开发文档.md) 和 [开发执行记录](docs/IMPLEMENTATION_STATUS.md)。
+
+## 5. 快速开始
+
+以下步骤以 **Windows PowerShell** 为例，从下载或克隆后的项目根目录执行。需要安装 [uv](https://docs.astral.sh/uv/getting-started/installation/)，首次安装与准备模型文件需要联网。项目已在 Python 3.11 环境验证。
+
+### 5.1 安装并启动模拟模式
 
 ```powershell
 uv sync --locked --all-extras
@@ -15,56 +150,30 @@ if (-not (Test-Path -LiteralPath '.env')) {
 }
 .venv/Scripts/python.exe -m annual_report_agent doctor
 .venv/Scripts/python.exe -m annual_report_agent models prepare-tokenizer
-./start.ps1
-```
-
-界面：[http://127.0.0.1:8501](http://127.0.0.1:8501)。接口说明：[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)。启动命令保持运行，按 `Ctrl+C` 结束后端与界面。若 PowerShell 不允许执行脚本，可直接运行：
-
-```powershell
 .venv/Scripts/python.exe -m annual_report_agent start
 ```
 
-也可分开启动，在两个终端分别执行 `.venv/Scripts/python.exe -m annual_report_agent api` 和 `.venv/Scripts/python.exe -m annual_report_agent ui`。后端只使用一个 worker。同一个 `data/mock` 或 `data/live` 目录只允许一个后端或批处理实例；看到 `INSTANCE_ALREADY_RUNNING` 时先停止原实例。不要通过删除锁文件绕过它。
+`--all-extras` 包含 AKShare 和本地重排依赖；仅体验基础功能可以使用 `uv sync --locked`。`prepare-tokenizer` 只准备切片计数文件，不下载 BGE-M3 的向量模型权重。
 
-`.env.example` 的默认端口与上述地址一致。若修改 `ARA_API_PORT`，同时把 `ARA_API_URL` 改成 UI 可访问的完整后端地址，例如 `http://127.0.0.1:8001`；修改 `ARA_UI_PORT` 后用新端口打开界面。修改配置后重启应用，CLI 命令仍从项目目录执行。
+- 操作界面：[http://127.0.0.1:8501](http://127.0.0.1:8501)
+- API 文档：[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- 保持启动终端运行，按 `Ctrl+C` 停止后端和界面；也可使用根目录的 `./start.ps1` 启动。
 
-基础功能可仅安装 `uv sync --locked`；`--all-extras` 额外安装 AKShare、PyTorch 和 FlagEmbedding。安装完后使用上面的 `.venv` 命令，避免再次执行未包含 extras 的 `uv run` 改变当前可选依赖。
+`.env.example` 默认 `ARA_MODE=mock`，无需 API Key。模拟模式用于检查界面、解析、计算和任务流，其问答采用模拟实现，不用于判断真实模型效果。
 
-## 2. 第一次使用
+### 5.2 上传一份 PDF
 
-1. **资料管理**：上传 PDF，核对公司、文件类型、年度、内容期间、问询轮次与文件版本，再点“解析并建立知识库”。
-2. **分析问答**：选择资料，输入问题。可以一句话问 2—3 个明确小问题；条件不清楚时系统应澄清。
-3. **证据与指标**：检查 PDF 物理页、提取原值、单位、期间与核验状态。只有 verified 的事实能进入计算器。
-4. **评测与报告**：生成固定模板的 Markdown 报告，或运行已登记的开发/测试题集。结果逐题保存在本地。
+1. 打开“资料管理”，上传可复制文字的 PDF，确认公司、文件类型、期间、问询轮次和版本。
+2. 点击“解析并建立知识库”，刷新任务状态，等待建库完成。
+3. 打开“分析问答”，选定资料后提问，例如“公司的主营业务和主要产品是什么？”
+4. 在“证据与指标”核对原文页及事实状态；计算问题还需要相应财务事实通过核验。
+5. 在“评测与报告”生成固定模板报告并下载 Markdown。
 
-提交后使用“刷新任务状态”查看完成结果；资料准备期间先等待完成，再修改公司或报告期。新上传文件提取的财务值默认可能为 `pending`，不能直接计算。当前明确登记的开发参考文件仅在源 SHA 匹配后参与核验；“查询 AKShare 候选值并核对”只支持已确认股票代码、年度且已建库的沪深全年年报，半年报和问询资料不走此入口。
+仓库不附带样本 PDF、模型权重或运行数据。已有评测清单包含开发机路径，在其他电脑使用前需准备相应文件并修改路径，文件哈希应与清单一致。具体步骤见 [运行与维护指南](docs/运行与维护指南.md)。
 
-扫描图片页暂不自动 OCR；页面会标记 `needs_ocr`。表格结构不确定时保留原文并标记，不能因此声称财务数值已自动提取正确。文字搜索和可信财务计算是独立能力。
+### 5.3 接入真实云端模型
 
-已提供的江丰文件正文是 **2026 年上半年**，不是 2022 年。数字计算用本报告的 2025 年同期比较列；未经审计。“更正后”来自文件名，不能据此推断更正内容。
-
-## 3. 导入本次真实样本
-
-先停止已启动的应用，再执行；样本清单使用本机路径，换电脑需要更新 path，SHA 必须保持匹配。
-
-```powershell
-.venv/Scripts/python.exe -m annual_report_agent samples --manifest evals/sample_manifest.json --prepare
-.venv/Scripts/python.exe -m annual_report_agent samples --manifest evals/annual_sample_manifest.json --split development --prepare
-```
-
-第一份清单包括南方招股书、越疆两份回复、江丰半年报。第二份清单包含 3 家公司各两年公开全年报；开发资料为茅台、格力，留出资料为福耀。下载脚本与官方 URL、SHA 保存在 `scripts/prepare_annual_eval.py` 和年报清单中。题目、答案和财务核验标签不会进入向量库。
-
-`--prepare` 在 `live` 模式会发送切片至百炼并计费；默认 `mock` 使用独立模拟向量。大 PDF 需要等待，命令定期显示正在处理，失败可重试并复用已完成编码批次。
-
-可先试这几题：
-
-- 选择江丰半年报：“2026 年上半年营业收入同比增长多少？”
-- 选择江丰半年报：“2026 年上半年的毛利率是多少？”
-- 选择越疆相应回复：“公司的产品矩阵覆盖哪些负载范围和轴数？”
-
-## 4. 开发完成后，填写真实云端配置
-
-在本机 `.env` 填写以下内容，密钥不要发到聊天、不要提交 Git：
+停止应用，在本地 `.env` 设置：
 
 ```dotenv
 ARA_MODE=live
@@ -72,93 +181,51 @@ DEEPSEEK_API_KEY=填入你的DeepSeek密钥
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_MODEL=deepseek-flash
 DASHSCOPE_API_KEY=填入你的百炼密钥
-DASHSCOPE_EMBEDDING_URL=填入百炼控制台实际完整Embedding地址
+DASHSCOPE_EMBEDDING_URL=填入账户对应的完整Embedding接口地址
+ARA_EMBEDDING_MODEL=text-embedding-v3
+ARA_EMBEDDING_DIMENSION=1024
 ARA_RETRIEVAL_MODE=hybrid
 ```
 
-两家的 Key 不互换。百炼地址必须与账户地域和业务空间一致，不能保留 `{WorkspaceId}` 等占位符。若 Key 来自第三方平台，先核对服务商的地址与型号；当前客户端按官方接口实现。
-
-停止应用后运行联通探针，再以 `live` 重新导入建库：
+百炼接口地址需与 Key 所属地域和业务空间匹配；当前客户端按官方接口实现，第三方平台需要另行核对接口兼容性与实际型号。`.env` 已列入 `.gitignore`。
 
 ```powershell
 .venv/Scripts/python.exe scripts/smoke_models.py --live
-.venv/Scripts/python.exe -m annual_report_agent samples --manifest evals/sample_manifest.json --prepare
 .venv/Scripts/python.exe -m annual_report_agent start
 ```
 
-`data/mock` 和 `data/live` 完全分开，真实检索不能复用模拟向量。缺配置时 live 明确失败，不自动切回模拟回答。N4 的问题与范围、N8 的选中原文与计算结果会发送给 DeepSeek；切片与检索问题会发送给百炼。
+探针通过后，在界面重新上传资料并建库。`data/mock` 与 `data/live` 相互隔离，模拟向量不能用于真实检索；live 缺少配置时明确报错，不自动退回模拟结果。真实建库和问答会产生云端 API 调用费用。
 
-## 5. 本地重排
+### 5.4 启用本地重排（可选）
+
+已安装 `--all-extras` 时，先准备权重并执行本地推理探针：
 
 ```powershell
 .venv/Scripts/python.exe -m annual_report_agent models prepare-reranker
 ```
 
-随后在 `.env` 设置 `ARA_RERANK_ENABLED=true`、`ARA_RETRIEVAL_MODE=hybrid` 并重启。模型是固定 revision 的 `BAAI/bge-reranker-v2-m3`，小批量 2、最大输入 1024 tokens；超长问题明确报错，不截掉年份或表头。本地模型只负责候选相关性排序，不负责生成答案。
+在 `.env` 中设置后重启应用：
 
-本机已验证 CPU FP32 加载与推理。当前锁定依赖默认安装的是 CPU PyTorch，RTX 5070 Ti 的 CUDA 推理尚未验收；CPU 模式可以运行完整链路。需要 GPU 时，应依据 [PyTorch 官方安装说明](https://pytorch.org/get-started/locally/)选取与本机驱动兼容的 CUDA wheel，再运行同一探针，确认输出设备实际为 `cuda:0`。不要把已检测到显卡当作 GPU 已成功推理。
+```dotenv
+ARA_RETRIEVAL_MODE=hybrid
+ARA_RERANK_ENABLED=true
+ARA_RERANK_DEVICE=cpu
+```
 
-`ARA_RERANK_DEVICE=auto` 自动选择可用设备；也可设 `cpu`。首次下载权重会占用磁盘并耗时，后续默认从本地缓存加载。
+重排模型为 `BAAI/bge-reranker-v2-m3`，默认批大小为 2，最大输入长度为 1024 tokens。上述配置使用已验证的 CPU 路径；GPU 配置与限制见 [运行与维护指南](docs/运行与维护指南.md)。
 
-## 6. 测试与评测
-
-执行下面的 `evaluate` 前，先按第 3 节在**当前模式**导入对应资料并建库，再停止 API/界面；评测 CLI 也会独占该模式的资料目录。通过界面提交评测时保留应用运行，由后端同一任务队列执行。修改 `.env` 为 `live` 后，评测会按实验配置调用真实云端并计费。
+### 5.5 测试与进一步使用
 
 ```powershell
 ./scripts/test.ps1 -q
 .venv/Scripts/ruff.exe check src tests scripts
 .venv/Scripts/python.exe scripts/smoke_models.py
-.venv/Scripts/python.exe -m annual_report_agent evaluate --dataset evals/development_inquiry_v1.jsonl --experiment R0
-.venv/Scripts/python.exe -m annual_report_agent evaluate --dataset evals/annual_development_v1.jsonl --experiment M2
 ```
 
-测试脚本使用项目 `tmp` 中的独立目录，绕开本机系统临时目录权限问题。不使用脚本时可加 `--basetemp=tmp/pytest-本次唯一名字`。
+部分真实 PDF 测试依赖本机样本，缺少文件时会跳过。已有本地验收记录为 400 项测试通过；具体样本条件和验证范围见 [验收文档](docs/验收文档.md)，不代表新环境或真实云端自动通过。
 
-已导入江丰样本时，可在停止应用后运行 `.venv/Scripts/python.exe scripts/validate_local.py` 核对五道计算题；结果写到 `outputs/当前模式/acceptance`。该脚本默认拒绝 live 模式，真实运行需另加 `--live`。没有用户本机 PDF 的机器会跳过部分真实资料测试，不能把跳过计作通过。
+- [运行与维护指南](docs/运行与维护指南.md)：样本导入、评测命令、端口配置、备份恢复与故障处理。
+- [评测说明](evals/README.md)：50 题的开发／留出划分、证据标注、公式和对照实验。
+- [开发文档](docs/A股年报智能分析Agent开发文档.md)：功能范围、技术方案与实现步骤。
 
-开发验收还提供 `.venv/Scripts/python.exe scripts/validate_experiments.py`，**先按第 3 节完成四份开发全年报建库、按第 5 节准备重排缓存，然后停止应用，仅在 mock 模式执行**。脚本读取六份年报清单并准备两份留出资料，显式启用对应参考核验，走正式 50 题（20 开发 / 30 留出）的 M2 流程，并用两道开发题各运行一次 R0—R3、M1/M2、Q0/Q1、C0/C1 功能检查；结果保存到 `outputs/mock/acceptance/experiment_workflow.json`。这是借助参考核验财务事实的流程检查，默认应用仍只登记五份开发参考；留出参考文件不作为检索内容或生成提示。两题单次检查不是完整实验对照，50题的模拟结果也不是真实质量成绩。
-
-实验含义：R0 关键词；R1 向量；R2 双路融合；R3 再加重排；M2 整个问答流程；M1 复用冻结证据只比较生成；Q0/Q1 固定子问题比较原问与改写；C0/C1 固定命中比较是否补充上下文。M1/Q/C 实验需传入先前 M2 保存的 `--frozen outputs/当前模式/evaluations/评测编号/frozen.json`。
-
-R3 需要先准备权重并启用重排。生成类实验可以用 `--repetitions 3`，模型档案由本地 `model_profiles.yaml` 管理；当前默认只有 DeepSeek Flash，不自动调用其他供应商。
-
-逐题日志与配置保存在 `outputs/mock/evaluations` 或 `outputs/live/evaluations`。模拟结果不进入正式质量均值；缺少人工语义评分时“结论支持率”等保持未评，不自动给满分。现有 gold 是必要片段子集，使用证据覆盖率，不把它包装成完整 Recall。8 项指标公式用 Decimal 执行，单位、时间或口径冲突时拒绝计算。
-
-## 7. 备份和恢复
-
-先停止应用与批处理，再执行：
-
-```powershell
-.venv/Scripts/python.exe -m annual_report_agent backup --to backups/mock-20261003.zip
-.venv/Scripts/python.exe -m annual_report_agent restore --archive backups/mock-20261003.zip --to restored_data/mock
-```
-
-备份包含当前模式的原 PDF、SQLite、Chroma、检查点与任务；不包含 `.env`、tokenizer/重排模型缓存及输出报告。每次备份使用新文件名；恢复先校验每个文件 SHA，只写入新的空目录，并重定位报告路径。在 `.env` 设置 `ARA_DATA_DIR=restored_data`、`ARA_MODE=mock` 后，启动时会使用恢复的 `restored_data/mock`；live 同理，模式必须与归档一致。
-
-准备新资料或重新建库前，再运行第 1 节的 `models prepare-tokenizer`，它会把计数文件放入新的 `ARA_DATA_DIR/tokenizer`。若启用本地重排，还要按第 5 节重新准备重排缓存。已有资料库不会替你恢复模型文件；真实密钥仍由本机环境文件单独保存。
-
-## 8. 常见问题与边界
-
-| 现象 | 处理 |
-|---|---|
-| 页面无法连接后端 | 查看 `outputs/当前模式/server_logs/api.log`，确认端口 8000/8501 未占用 |
-| `CONFIGURATION_REQUIRED` | 补齐提示的环境变量名并重启，不需要把 Key 发给开发者 |
-| `INDEX_PROFILE_MISMATCH` / `INDEX_STALE` | 在当前模式、最新身份配置下重新建库 |
-| `METADATA_UNCONFIRMED` | 在资料管理中确认身份信息 |
-| `REPORT_BUSY` | 等待该资料的准备任务结束，再修改公司、期间或文档类型 |
-| `TOKENIZER_UNAVAILABLE` | 从项目目录运行 models prepare-tokenizer，并确认使用同一个 ARA_DATA_DIR |
-| `needs_ocr` / 表格结构不确定 | 换可复制文字版本，或保留标记等待人工核验，不将失败页视为没有披露 |
-| 数字查询资料不足 | 查核验事实状态；未核验、分母为零、期间不一致或口径冲突均不能硬算 |
-| 公告下载失败 | 改用本地 PDF 上传；动态详情页、代理 Fake-IP、超时和非允许源有明确错误 |
-| 重排权重未就绪 | 先运行 prepare-reranker；默认不在每次问答中自动联网下载 |
-
-项目面向本机单用户，不作为公开互联网服务部署。无登录、多租户和后台权限体系；默认仅监听 `127.0.0.1`。原文引用的程序校验能验证来源存在、数值与公式一致，但不能自动证明任意文字解释完全正确，仍需独立评测。
-
-核心目录：`ingestion` 解析建库，`retrieval` 双路与重排，`finance` 数值规则，`graph` 九节点，`generation` 云端与核验，`api` 后端，`ui` 界面，`evaluation` 评测，`evals` 题集与参考。正式设计见 `docs/A股年报智能分析Agent开发文档.md`。
-
-
-### Windows 中文路径说明
-
-当前锁定的 Chroma 1.5.9 在本机中文目录中曾出现超过 1000 个向量后，HNSW 文件未落盘、重启无法查询的问题。程序会自动在同盘最近的英文祖先目录下创建 `.annual-report-agent/chroma-paths/` 目录别名；实际数据仍保存在 `ARA_DATA_DIR` 内，备份范围不变。别名已用 1100 个向量、两个独立进程验证。若机器不允许创建目录别名，请将 `ARA_DATA_DIR` 配置为可写的纯英文绝对路径。
-
-重新点击“解析建库”会检查现有索引；损坏时从已缓存向量构建新版本，成功后才切换，不删除原版本。停止应用时会关闭向量库句柄。恢复备份后目录别名会按新路径重建。
+同一模式的数据目录一次只允许一个后端或批处理实例。运行样本导入、CLI 评测或备份前，先停止正在使用该目录的应用；通过界面提交的任务由后端队列统一执行。
